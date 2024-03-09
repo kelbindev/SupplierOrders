@@ -3,19 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupplierOrders", "SupplierOrders.csproj", "{73745091-0B5B-4C7B-B28A-23FD3FC48932}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupplierOrders", "SupplierOrders\SupplierOrders.csproj", "{73745091-0B5B-4C7B-B28A-23FD3FC48932}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "..\Contracts\Contracts.csproj", "{0F6F9A92-D40C-43C5-B733-D47D5F017D93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{0F6F9A92-D40C-43C5-B733-D47D5F017D93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "..\Repository\Repository.csproj", "{8E9D72D8-D25B-4F8A-878D-6D3369A8BA8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{8E9D72D8-D25B-4F8A-878D-6D3369A8BA8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "..\Service\Service.csproj", "{B2D35DA6-27D5-4682-97F7-CE6766366AD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{B2D35DA6-27D5-4682-97F7-CE6766366AD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Contracts", "..\Service.Contracts\Service.Contracts.csproj", "{4DBAD3D8-6472-4EDA-BFF2-FF0DE8FF7AEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Contracts", "Service.Contracts\Service.Contracts.csproj", "{4DBAD3D8-6472-4EDA-BFF2-FF0DE8FF7AEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "..\Entities\Entities.csproj", "{11ACED79-D364-47AC-8A5A-7141268C9873}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Entities\Entities.csproj", "{11ACED79-D364-47AC-8A5A-7141268C9873}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "..\Shared\Shared.csproj", "{F946107D-C575-4745-917C-A88FC17F1252}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{F946107D-C575-4745-917C-A88FC17F1252}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
