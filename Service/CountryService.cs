@@ -24,20 +24,14 @@ internal sealed class CountryService(ICountryRepository _repository) : ICountryS
         return ApiResponse.SuccessResponse($"Country {country.CountryName} deleted");
     }
 
-    public async Task<ApiResponse> Get(int id)
+    public async Task<Country> Get(int id)
     {
-        var country = await _repository.Get(id);
-
-        if (country is null)
-            return ApiResponse.FailResponse($"Country with ID:{id} not found");
-
-        return ApiResponse.SuccessResponse(country);
+        return await _repository.Get(id);
     }
 
-    public async Task<ApiResponse> GetAll()
+    public async Task<IEnumerable<Country>> GetAll()
     {
-        var countryList = await _repository.GetAll();
-        return ApiResponse.SuccessResponse(countryList);
+        return await _repository.GetAll();
     }
 
     public async Task<ApiResponse> Update(Country country)

@@ -24,20 +24,14 @@ internal sealed class SupplierService(ISupplierRepository _repository) : ISuppli
         return ApiResponse.SuccessResponse($"Supplier {supplier.SupplierName} deleted");
     }
 
-    public async Task<ApiResponse> Get(int id)
+    public async Task<Supplier> Get(int id)
     {
-        var supplier = await _repository.Get(id);
-     
-        if (supplier is null)
-            return ApiResponse.FailResponse($"Supplier with ID:{id} not found");
-
-        return ApiResponse.SuccessResponse(supplier);
+        return await _repository.Get(id);
     }
 
-    public async Task<ApiResponse> GetAll()
+    public async Task<IEnumerable<Supplier>> GetAll()
     {
-        var supplierList = await _repository.GetAll();
-        return ApiResponse.SuccessResponse(supplierList);
+        return await _repository.GetAll();
     }
 
     public async Task<ApiResponse> Update(Supplier supplier)
