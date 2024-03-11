@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Shared;
+using Shared.Pagination;
 
 namespace SupplierOrders.Controllers;
 public class SupplierController(IServiceManager _service) : Controller
@@ -114,5 +115,13 @@ public class SupplierController(IServiceManager _service) : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> GetSupplierPaged(SupplierRequestParameter param)
+    {
+        var result = await _service.Supplier.GetAllPaged(param);
+
+        return Json(new { data = result, metaData = result.MetaData });
     }
 }
