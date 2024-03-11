@@ -2,6 +2,7 @@
 using Entities;
 using Service.Contracts;
 using Shared;
+using Shared.Pagination;
 
 namespace Service;
 internal sealed class SupplierService(ISupplierRepository _repository) : ISupplierService
@@ -32,6 +33,11 @@ internal sealed class SupplierService(ISupplierRepository _repository) : ISuppli
     public async Task<IEnumerable<Supplier>> GetAll()
     {
         return await _repository.GetAll();
+    }
+
+    public async Task<PagedList<Supplier>> GetAllPaged(SupplierRequestParameter param, bool trackChanges = false)
+    {
+        return await _repository.GetAllPaged(param, trackChanges);
     }
 
     public async Task<ApiResponse> Update(Supplier supplier)
