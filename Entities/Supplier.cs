@@ -17,6 +17,7 @@ public class Supplier : CommonField
     public string SupplierEmail { get; set; }
 
     [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "Please Select Country")]
     public int CountryId {  get; set; }
 
     public Country Country { get; set; }

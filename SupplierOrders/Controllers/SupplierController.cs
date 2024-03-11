@@ -1,85 +1,88 @@
 ﻿using Entities;
-using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Shared;
 
 namespace SupplierOrders.Controllers;
-public class SupplierController(ISupplierService _service) : Controller
+public class SupplierController(IServiceManager _service) : Controller
 {
     // GET: SupplierController
     public async Task<ActionResult> Index()
     {
-        return View(await _service.GetAll());
+        return View(await _service.Supplier.GetAll());
     }
 
     // GET: SupplierController/Details/5
     public async Task<ActionResult> Details(int id)
     {
-        var supplier = await _service.Get(id);
+        if (id == 0) return NotFound();
+
+        var supplier = await _service.Supplier.Get(id);
+
+        if (supplier is null) return NotFound();
 
         return View(supplier);
     }
 
     // GET: SupplierController/Create
-    public ActionResult Create()
+    public async Task<ActionResult> Create()
     {
+        ViewBag.Country = await _service.Country.GetAll();
+
         return View();
     }
 
     // POST: SupplierController/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> Create(SupplierDto dto)
+    public async Task<ActionResult> Create(Supplier supplier)
     {
-        var supplier = new Supplier
-        {
-            SupplierName = dto.SupplierName,
-            SupplierEmail = dto.SupplierEmail,
-            CountryId = dto.CountryId,
-            CreatedBy = dto.ActionBy
-        };
+        supplier.CreatedBy = "USER";
+        supplier.CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        supplier.UpdatedBy = "USER";
+        supplier.UpdatedDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        var result = await _service.Add(supplier);
+        var result = await _service.Supplier.Add(supplier);
 
         if (!result.Success)
         {
             TempData["ErrorMessage"] = result.Message;
-            return View();
+            return View(supplier);
         }
 
         return RedirectToAction(nameof(Index));
     }
 
     // GET: SupplierController/Edit/5
-    public ActionResult Edit(int id)
+    public async Task<ActionResult> Edit(int id)
     {
         if (id == 0) return NotFound();
 
-        return View();
+        ViewBag.Country = await _service.Country.GetAll();
+
+        var supplier = await _service.Supplier.Get(id);
+
+        if (supplier is null) return NotFound();
+
+        return View(supplier);
     }
 
     // POST: SupplierController/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> Edit(int id, SupplierDto dto)
+    public async Task<ActionResult> Edit(Supplier supplier)
     {
-        var supplier = new Supplier
-        {
-            Id = id,
-            SupplierName = dto.SupplierName,
-            SupplierEmail = dto.SupplierEmail,
-            CountryId = dto.CountryId,
-            UpdatedBy = dto.ActionBy,
-            UpdatedDate = DateOnly.FromDateTime(DateTime.UtcNow)
-        };
+        ViewBag.Country = await _service.Country.GetAll();
 
-        var result = await _service.Update(supplier);
+        supplier.UpdatedBy = "USER";
+        supplier.UpdatedDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var result = await _service.Supplier.Update(supplier);
 
         if (!result.Success)
         {
             TempData["ErrorMessage"] = result.Message;
-            return View();
+            return View(supplier);
         }
 
 
@@ -87,31 +90,27 @@ public class SupplierController(ISupplierService _service) : Controller
     }
 
     // GET: SupplierController/Delete/5
-    public ActionResult Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
-        return View();
+        if (id == 0) return NotFound();
+
+        var supplier = await _service.Supplier.Get(id);
+
+        if (supplier is null) return NotFound();
+
+        return View(supplier);
     }
 
     // POST: SupplierController/Delete/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> Delete(int id, SupplierDto dto)
+    public async Task<ActionResult> Delete(Supplier supplier)
     {
-        var supplier = new Supplier
-        {
-            Id = id,
-            SupplierName = dto.SupplierName,
-            SupplierEmail = dto.SupplierEmail,
-            CountryId = dto.CountryId,
-            UpdatedBy = dto.ActionBy,
-            UpdatedDate = DateOnly.FromDateTime(DateTime.UtcNow)
-        };
-
-        var result = await _service.Delete(supplier);
+        var result = await _service.Supplier.Delete(supplier);
 
         if (!result.Success) {
             TempData["ErrorMessage"] = result.Message;
-            return View();
+            return View(supplier);
         }
 
         return RedirectToAction(nameof(Index));

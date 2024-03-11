@@ -17,5 +17,13 @@ public class Country
     [MaxLength(100)]
     public string CountryName { get; set; }
 
+    public string CountryCodeAndName
+    {
+        get
+        {
+            return $"{CountryCode} - {CountryName}";
+        }
+    }
+
     public ICollection<Supplier> Suppliers { get; set; }
 }

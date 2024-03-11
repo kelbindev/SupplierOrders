@@ -19,31 +19,38 @@ internal sealed class SupplierRepository(SupplierOrdersContext context) : ISuppl
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> Exists(Supplier supplier)
+    public async Task<bool> Exists(Supplier supplier, bool trackChanges = false)
     {
-        return await SupplierNameExists(supplier.SupplierName)
-        || supplier.Id == 0 ? false
-            : await Get(supplier.Id) is not null; ;
+        var s = await Get(supplier.Id, trackChanges);
+        return s is not null;
     }
 
-    public async Task<Supplier> Get(int id)
+    public async Task<Supplier> Get(int id, bool trackChanges = false)
     {
-        return await _context.Suppliers.FirstOrDefaultAsync(x => x.Id == id);
+        return 
+            trackChanges ? await _context.Suppliers.Include(s => s.Country).FirstOrDefaultAsync(x => x.Id == id) 
+            : await _context.Suppliers.Include(s => s.Country).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<IEnumerable<Supplier>> GetAll()
+    public async Task<IEnumerable<Supplier>> GetAll(bool trackChanges = false)
     {
-        return await _context.Suppliers.ToListAsync();
+        return 
+            trackChanges ? await _context.Suppliers.Include(s => s.Country).ToListAsync()
+            : await _context.Suppliers.Include(s => s.Country).AsNoTracking().ToListAsync();
     }
 
-    public async Task Update(Supplier supplier)
+    public async Task Update(Supplier updatedSupplier)
     {
-        _context.Attach(supplier);
-        _context.Entry(supplier).State = EntityState.Modified;
+        var existing = await Get(updatedSupplier.Id, true);
+
+        existing.SupplierEmail = updatedSupplier.SupplierEmail;
+        existing.SupplierName = updatedSupplier.SupplierName;
+        existing.UpdatedBy = updatedSupplier.UpdatedBy;
+        existing.UpdatedDate = updatedSupplier.UpdatedDate;
+        existing.CountryId = updatedSupplier.CountryId;
+
+        _context.Entry(existing).State = EntityState.Modified;
 
         await _context.SaveChangesAsync();
     }
-
-    private async Task<bool> SupplierNameExists(string supplierName) => await _context.Suppliers.AnyAsync(s => s.SupplierName.Equals(supplierName, StringComparison.CurrentCultureIgnoreCase));
 }
-

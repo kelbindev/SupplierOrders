@@ -19,31 +19,36 @@ internal sealed class CountryRepository(SupplierOrdersContext context) : ICountr
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> Exists(Country country)
+    public async Task<bool> Exists(Country country, bool trackChanges = false)
     {
-        return await CountryNameExists(country.CountryName)
-            || country.Id == 0 ? false 
-            : await Get(country.Id) is not null;
+        var c = await Get(country.Id, trackChanges);
+
+        return c is not null;
     }
 
-    public async Task<Country> Get(int id)
+    public async Task<Country> Get(int id, bool trackChanges = false)
     {
-        return await _context.Countries.FirstOrDefaultAsync(ct => ct.Id == id);
+        return 
+            trackChanges ? await _context.Countries.FirstOrDefaultAsync(ct => ct.Id == id)
+            : await _context.Countries.AsNoTracking().FirstOrDefaultAsync(ct => ct.Id == id);
     }
 
-    public async Task<IEnumerable<Country>> GetAll()
+    public async Task<IEnumerable<Country>> GetAll(bool trackChanges = false)
     {
-        return await _context.Countries.ToListAsync();
+        return
+            trackChanges ? await _context.Countries.ToListAsync()
+            : await _context.Countries.AsNoTracking().ToListAsync();
     }
 
-    public async Task Update(Country country)
+    public async Task Update(Country updatedCountry)
     {
-        _context.Attach(country);
-        _context.Entry(country).State = EntityState.Modified;
+        var existing = await Get(updatedCountry.Id, true);
+
+        existing.CountryCode = updatedCountry.CountryCode;
+        existing.CountryName = updatedCountry.CountryName;
+
+        _context.Entry(existing).State = EntityState.Modified;
 
         await _context.SaveChangesAsync();
     }
-
-    private async Task<bool> CountryNameExists(string countryName) => await _context.Countries.AnyAsync(c => c.CountryName.Equals(countryName, StringComparison.OrdinalIgnoreCase));
-
 }
