@@ -19,6 +19,15 @@ public abstract class BaseRequestParameters
     public List<Column> columns { get; set; } = new List<Column>();
     public Search search { get; set; } = new();
     public List<Order> order { get; set; } = new List<Order>();
+
+    public string GetColumnSearchValueBasedOnColumnName(string columnName)
+    {
+        var col = columns.FirstOrDefault(c => c.data.Equals(columnName, StringComparison.OrdinalIgnoreCase) && c.searchable);
+
+        if (col is null) return string.Empty;
+
+        return col.search.value is null ? string.Empty : col.search.value.ToLower();
+    }
 }
 
 public class Column
