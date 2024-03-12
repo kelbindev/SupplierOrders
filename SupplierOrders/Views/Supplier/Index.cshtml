@@ -1,5 +1,5 @@
-﻿@using Entities
-@model IEnumerable<Supplier>
+﻿@using Shared
+@model IEnumerable<SupplierDto>
 
 @{
     ViewData["Title"] = "Supplier";
@@ -10,9 +10,12 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
+<table id="tableSupplier" class="table">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.SupplierName)
             </th>
@@ -20,35 +23,77 @@
                 @Html.DisplayNameFor(model => model.SupplierEmail)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Country.CountryName)
+                @Html.DisplayNameFor(model => model.CountryId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
+                @Html.DisplayNameFor(model => model.CountryCodeAndName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedBy)
             </th>
             <th></th>
         </tr>
     </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.SupplierName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SupplierEmail)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Country.CountryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
 </table>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            InitDatatable();
+        })
+
+        function InitDatatable() {
+            new DataTable('#tableSupplier', {
+                ajax: {
+                    async: true,
+                    processing: true,
+                    serverSide: true,
+                    url: "/Supplier/GetSupplierPaged",
+                    data: function (d) {
+                        d.pageSize = d.length;
+                        d.pageNumber = d.start == 0 ? 1 : (d.start / d.length) + 1;
+                    },
+                    type: "POST",
+                    dataSrc: function (response) {
+                        response.recordsTotal = response.metaData.totalCount;
+                        response.recordsFiltered = response.metaData.totalCount;
+
+                        return response.data;
+                    },
+                },
+                search: {
+                    return: true
+                },
+                columnDefs: [
+                    { "visible": false, "targets": [0, 3] },
+                    { "searchable": true, "targets": [1, 2, 4, 5, 6] }
+                ],
+                columns: [
+                    { data: 'id' },
+                    { data: 'supplierName' },
+                    { data: 'supplierEmail' },
+                    { data: 'countryId' },
+                    { data: 'countryCodeAndName' },
+                    { data: 'updatedDate' },
+                    { data: 'updatedBy' },
+                    { data: 'action' ,
+                        render: function (_, _, row) {
+                            
+                            const editUrl = `/Supplier/Edit?id=${row.id}`;
+                            const detailsUrl = `/Supplier/Details?id=${row.id}`;
+                            const deleteUrl = `/Supplier/Delete?id=${row.id}`;
+
+                            return `<a href="${editUrl}">Edit</a> |
+                            <a href="${detailsUrl}">Details</a> |
+                            <a href="${deleteUrl}">Delete</a>`;
+                    }}
+                ],
+                serverSide: true,
+                processing: true,
+            });
+        }
+    </script>
+}

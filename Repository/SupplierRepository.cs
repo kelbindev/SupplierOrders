@@ -42,7 +42,7 @@ internal sealed class SupplierRepository(SupplierOrdersContext context) : ISuppl
 
     public async Task<PagedList<Supplier>> GetAllPaged(SupplierRequestParameter param, bool trackChanges = false)
     {
-        string globalSearchValue = param.search.value.ToLower();
+        string globalSearchValue = param.search.value is null ? string.Empty : param.search.value.ToLower();
 
         var query = _context.Suppliers.Include(s => s.Country)
             //for column search
@@ -51,21 +51,22 @@ internal sealed class SupplierRepository(SupplierOrdersContext context) : ISuppl
             .Where(s => string.IsNullOrWhiteSpace(param.SearchCountry) || s.Country.CountryCodeAndName.ToLower().Contains(param.SearchCountry.ToLower()));
 
         //for global search
-        if (!string.IsNullOrWhiteSpace(param.search.value)) { 
+        if (!string.IsNullOrWhiteSpace(param.search.value)) {
             query = query
-            .Where(s => s.SupplierName.Contains(globalSearchValue))
-            .Where(s => s.SupplierEmail.Contains(globalSearchValue))
-            .Where(s => s.Country.CountryCodeAndName.Contains(globalSearchValue));
+            .Where(s => s.SupplierName.Contains(globalSearchValue) 
+                        || s.SupplierEmail.Contains(globalSearchValue) 
+                        || s.Country.CountryName.Contains(globalSearchValue) 
+                        || s.Country.CountryCode.Contains(globalSearchValue));
         }
 
         var count = await query.CountAsync();
 
         var resultQuery = query
             .OrderBy(s => s.Id)
-            .Skip(param.PageNumber * param.PageSize)
+            .Skip((param.PageNumber - 1) * param.PageSize)
             .Take(param.PageSize);
 
-        if (trackChanges) resultQuery = resultQuery.AsNoTracking();
+        if (!trackChanges) resultQuery = resultQuery.AsNoTracking();
 
         var content = await resultQuery.ToListAsync();
 

@@ -8,9 +8,9 @@ namespace SupplierOrders.Controllers;
 public class SupplierController(IServiceManager _service) : Controller
 {
     // GET: SupplierController
-    public async Task<ActionResult> Index()
+    public ActionResult Index()
     {
-        return View(await _service.Supplier.GetAll());
+        return View();
     }
 
     // GET: SupplierController/Details/5
@@ -122,6 +122,23 @@ public class SupplierController(IServiceManager _service) : Controller
     {
         var result = await _service.Supplier.GetAllPaged(param);
 
-        return Json(new { data = result, metaData = result.MetaData });
+        var data = new List<SupplierDto>();
+
+        foreach (var item in result)
+        {
+            var dto = new SupplierDto
+            {
+                Id = item.Id,
+                SupplierEmail = item.SupplierEmail,
+                SupplierName = item.SupplierName,
+                CountryId = item.CountryId,
+                CountryCodeAndName = item.Country.CountryCodeAndName,
+                UpdatedBy = item.UpdatedBy,
+                UpdatedDate = item.UpdatedDate
+            };
+            data.Add(dto);
+        }
+
+        return Json(new { data, metaData = result.MetaData });
     }
 }
