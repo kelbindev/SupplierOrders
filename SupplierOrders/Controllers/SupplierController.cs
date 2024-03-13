@@ -141,4 +141,12 @@ public class SupplierController(IServiceManager _service) : Controller
 
         return Json(new { data, metaData = result.MetaData });
     }
+
+    [HttpPost]
+    public async Task<ActionResult> ExportToExcel(SupplierRequestParameter param)
+    {
+        var result = await _service.Supplier.GetAllPagedExportToExcel(param);
+
+        return File(result.memoryStream, result.contentType, result.fileName);
+    }
 }

@@ -79,20 +79,45 @@
                     { data: 'countryCodeAndName' },
                     { data: 'updatedDate' },
                     { data: 'updatedBy' },
-                    { data: 'action' ,
+                    {
+                        data: 'action',
                         render: function (_, _, row) {
-                            
+
                             const editUrl = `/Supplier/Edit?id=${row.id}`;
                             const detailsUrl = `/Supplier/Details?id=${row.id}`;
                             const deleteUrl = `/Supplier/Delete?id=${row.id}`;
 
                             return `<a href="${editUrl}">Edit</a> |
-                            <a href="${detailsUrl}">Details</a> |
-                            <a href="${deleteUrl}">Delete</a>`;
-                    }}
+                                                                    <a href="${detailsUrl}">Details</a> |
+                                                                    <a href="${deleteUrl}">Delete</a>`;
+                        }
+                    }
                 ],
                 serverSide: true,
                 processing: true,
+                dom: 'lBfrtip',
+                buttons:
+                    [{
+                        text: 'Export to Excel',
+                        action: function (e, dt, button, config) {
+                            $.ajax({
+                                url: '/Supplier/ExportToExcel',
+                                type: 'POST',
+                                data: dt.ajax.params(),
+                                xhrFields: {
+                                    responseType: 'blob'
+                                },
+                                success: function (result) {
+                                    const link = document.createElement('a');
+                                    link.href = window.URL.createObjectURL(result);
+                                    link.download = 'Suppliers.xlsx';
+                                    link.click();
+
+                                    window.URL.revokeObjectURL(link.href);
+                                }
+                            });
+                        }
+                    }]
             });
         }
     </script>

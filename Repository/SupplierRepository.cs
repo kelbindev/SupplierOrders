@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Repository.Context;
 using Shared.Pagination;
-using System.Reflection;
-using System.Text;
 
 namespace Contracts.Repository;
 internal sealed class SupplierRepository(SupplierOrdersContext context) : ISupplierRepository
@@ -64,6 +62,19 @@ internal sealed class SupplierRepository(SupplierOrdersContext context) : ISuppl
         var content = await resultQuery.ToListAsync();
 
         return new PagedList<Supplier>(content, count, param.PageNumber, param.PageSize);
+    }
+
+    public async Task<List<Supplier>> GetAllPagedExportToExcel(SupplierRequestParameter param)
+    {
+        string globalSearchValue = param.search.value is null ? string.Empty : param.search.value.ToLower();
+
+        var query = _context.Suppliers.Include(s => s.Country).Where(s => s.Id == s.Id);
+
+        query = SetColumnWhereCondition(query, param);
+
+        query = SetGlobalSearchWhereCondition(query, globalSearchValue);
+
+        return await query.AsNoTracking().ToListAsync();
     }
 
     public async Task Update(Supplier updatedSupplier)

@@ -1,5 +1,6 @@
 ﻿using Contracts.Repository;
 using Entities;
+using OfficeOpenXml;
 using Service.Contracts;
 using Shared;
 using Shared.Pagination;
@@ -40,6 +41,38 @@ internal sealed class SupplierService(ISupplierRepository _repository) : ISuppli
         return await _repository.GetAllPaged(param, trackChanges);
     }
 
+    public async Task<DownloadFileDto> GetAllPagedExportToExcel(SupplierRequestParameter param)
+    {
+        var supplierList = await _repository.GetAllPagedExportToExcel(param);
+
+        string filePath = AppDomain.CurrentDomain.BaseDirectory + "\\Excel";
+        string fileName = string.Format("Supplier_{0}.xlsx", DateTime.Now.ToString("yyyyMMddHHmmss"));
+        string fullPath = string.Format("{0}\\{1}", filePath, fileName);
+
+        if (!Directory.Exists(filePath))
+            Directory.CreateDirectory(filePath);
+
+        using (var excel = new ExcelPackage(new FileInfo(fullPath)))
+        {
+            var sheet1 = excel.Workbook.Worksheets.Add("Supplier");
+
+            WriteFloorProfitProjectTemplateSheet(sheet1, supplierList);
+            await excel.SaveAsync();
+        }
+
+        MemoryStream ms = new();
+        await using (FileStream file = new(fullPath, FileMode.Open, FileAccess.Read))
+        {
+            await file.CopyToAsync(ms);
+            ms.Position = 0;
+        }
+
+        //if (File.Exists(fullPath))
+        //    File.Delete(fullPath);
+
+        return new DownloadFileDto(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
+
     public async Task<ApiResponse> Update(Supplier supplier)
     {
         if (!await _repository.Exists(supplier))
@@ -47,5 +80,23 @@ internal sealed class SupplierService(ISupplierRepository _repository) : ISuppli
 
         await _repository.Update(supplier);
         return ApiResponse.SuccessResponse($"Supplier {supplier.SupplierName} updated");
+    }
+
+    private void WriteFloorProfitProjectTemplateSheet(ExcelWorksheet sheet, List<Supplier> supplierList)
+    {
+        //TEMPLATE HEADER
+        var row1Header = new object[] { "SupplierName","SupplierEmail","Country Code", "Country Name","CreatedDate","CreatedBy","UpdatedDate","UpdatedBy" };
+        
+        List<object[]> rows = new List<object[]>();
+
+        rows.Add(row1Header);
+
+        foreach(var supplier in supplierList)
+        {
+            var obj = new object[] { supplier.SupplierName, supplier.SupplierEmail, supplier.Country.CountryCode, supplier.Country.CountryName, supplier.CreatedDate, supplier.CreatedBy, supplier.UpdatedDate, supplier.UpdatedBy };
+            rows.Add(obj);
+        }
+
+        sheet.Cells[1, 1].LoadFromArrays(rows);
     }
 }
