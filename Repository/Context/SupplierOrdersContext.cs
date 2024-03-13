@@ -10,8 +10,14 @@ public class SupplierOrdersContext(DbContextOptions options) : DbContext(options
             .HasOne(s => s.Country)
             .WithMany(c => c.Suppliers)
             .HasForeignKey(s => s.CountryId);
+
+        modelBuilder.Entity<UserRefreshToken>()
+         .HasOne(rt => rt.User)
+         .WithOne(u => u.RefreshToken)
+         .HasForeignKey<UserRefreshToken>(rt => rt.UserId);
     }
 
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<Country> Countries { get; set; }
+    public DbSet<User> Users { get; set; }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository.Context;
 
@@ -11,9 +12,11 @@ using Repository.Context;
 namespace Repository.Migrations
 {
     [DbContext(typeof(SupplierOrdersContext))]
-    partial class SupplierOrdersContextModelSnapshot : ModelSnapshot
+    [Migration("20240313150229_AddedUserTable")]
+    partial class AddedUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,14 +104,9 @@ namespace Repository.Migrations
                     b.Property<DateOnly>("CreatedDate")
                         .HasColumnType("date");
 
-                    b.Property<byte[]>("Password")
+                    b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("PasswordSalt")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
                         .IsRequired()
@@ -119,13 +117,11 @@ namespace Repository.Migrations
 
                     b.Property<string>("UserEmail")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
 
@@ -142,8 +138,7 @@ namespace Repository.Migrations
 
                     b.Property<string>("RefreshToken")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("RefreshTokenExpiry")
                         .HasColumnType("datetime2");

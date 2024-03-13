@@ -7,6 +7,7 @@ var configuration = builder.Configuration;
 
 builder.Services.ConfigureRepository(configuration);
 builder.Services.ConfigureServices();
+builder.Services.AddJwtConfiguration(configuration);
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -24,6 +25,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

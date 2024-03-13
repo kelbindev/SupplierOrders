@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository.Context;
 
@@ -11,9 +12,11 @@ using Repository.Context;
 namespace Repository.Migrations
 {
     [DbContext(typeof(SupplierOrdersContext))]
-    partial class SupplierOrdersContextModelSnapshot : ModelSnapshot
+    [Migration("20240313151343_ModifyUserTable")]
+    partial class ModifyUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
