@@ -69,7 +69,8 @@
                 },
                 columnDefs: [
                     { "visible": false, "targets": [0, 3] },
-                    { "searchable": true, "targets": [1, 2, 4, 5, 6] }
+                    { "searchable": true, "targets": [1, 2, 5, 6] },
+                    { "orderable": false, "targets": [3, 4, 6] }
                 ],
                 columns: [
                     { data: 'id' },
@@ -87,9 +88,7 @@
                             const detailsUrl = `/Supplier/Details?id=${row.id}`;
                             const deleteUrl = `/Supplier/Delete?id=${row.id}`;
 
-                            return `<a href="${editUrl}">Edit</a> |
-                                                                    <a href="${detailsUrl}">Details</a> |
-                                                                    <a href="${deleteUrl}">Delete</a>`;
+                            return `<a href="${editUrl}">Edit</a> | <a href="${detailsUrl}">Details</a> | <a href="${deleteUrl}">Delete</a>`;
                         }
                     }
                 ],
@@ -117,7 +116,19 @@
                                 }
                             });
                         }
-                    }]
+                    }],
+                initComplete: function () {
+                    this.api().columns('.searchable').every(function () {  
+                        var column = this;
+                        var input = $(this.header()).next().find('input');
+
+                        input.on('keyup change clear', function () {
+                            if (column.search() !== this.value) {
+                                column.search(this.value).draw();
+                            }
+                        });
+                    });
+                }
             });
         }
     </script>

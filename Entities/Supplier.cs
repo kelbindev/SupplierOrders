@@ -18,7 +18,15 @@ public class Supplier : CommonField
 
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "Please Select Country")]
-    public int CountryId {  get; set; }
+    public int CountryId { get; set; }
 
     public Country Country { get; set; }
+
+    public string CountryName
+    {
+        get
+        {
+            return Country is not null && Country.Id > 0 ? Country.CountryName : string.Empty;
+        }
+    }
 }
