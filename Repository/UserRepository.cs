@@ -9,7 +9,7 @@ internal sealed class UserRepository(SupplierOrdersContext context) : IUserRepos
     private readonly SupplierOrdersContext _context = context;
     public async Task Add(User user)
     {
-        await _context.AddAsync(user);
+        await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
     }
 

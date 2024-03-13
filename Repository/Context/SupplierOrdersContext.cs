@@ -20,4 +20,5 @@ public class SupplierOrdersContext(DbContextOptions options) : DbContext(options
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<Country> Countries { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<UserRefreshToken> UsersRefreshToken { get; set; }
 }
