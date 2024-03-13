@@ -22,8 +22,13 @@ internal sealed class SupplierRepository(SupplierOrdersContext context) : ISuppl
 
     public async Task<bool> Exists(Supplier supplier, bool trackChanges = false)
     {
-        var s = await Get(supplier.Id, trackChanges);
-        return s is not null;
+        return await Get(supplier.Id, trackChanges) is not null 
+            || await _context.Suppliers.AnyAsync(s => s.SupplierName.ToLower() == supplier.SupplierName);
+    }
+
+    public async Task<bool> SupplierNameAlreadyExists(Supplier supplier)
+    {
+        return await _context.Suppliers.AnyAsync(s => s.SupplierName.ToLower() == supplier.SupplierName.ToLower() && s.Id != supplier.Id);
     }
 
     public async Task<Supplier> Get(int id, bool trackChanges = false)

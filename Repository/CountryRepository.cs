@@ -21,9 +21,7 @@ internal sealed class CountryRepository(SupplierOrdersContext context) : ICountr
 
     public async Task<bool> Exists(Country country, bool trackChanges = false)
     {
-        var c = await Get(country.Id, trackChanges);
-
-        return c is not null;
+        return await Get(country.Id, trackChanges) is not null || await _context.Countries.AnyAsync(c => c.CountryName == country.CountryName);
     }
 
     public async Task<Country> Get(int id, bool trackChanges = false)

@@ -47,6 +47,7 @@ public class SupplierController(IServiceManager _service) : Controller
 
         if (!result.Success)
         {
+            ViewBag.Country = await _service.Country.GetAll();
             TempData["ErrorMessage"] = result.Message;
             return View(supplier);
         }
@@ -82,6 +83,7 @@ public class SupplierController(IServiceManager _service) : Controller
 
         if (!result.Success)
         {
+            ViewBag.Country = await _service.Country.GetAll();
             TempData["ErrorMessage"] = result.Message;
             return View(supplier);
         }

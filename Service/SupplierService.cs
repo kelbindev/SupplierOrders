@@ -78,6 +78,9 @@ internal sealed class SupplierService(ISupplierRepository _repository) : ISuppli
         if (!await _repository.Exists(supplier))
             return ApiResponse.FailResponse($"Supplier {supplier.SupplierName} does not exists");
 
+        if (await _repository.SupplierNameAlreadyExists(supplier))
+            return ApiResponse.FailResponse($"Supplier {supplier.SupplierName} already exists");
+
         await _repository.Update(supplier);
         return ApiResponse.SuccessResponse($"Supplier {supplier.SupplierName} updated");
     }
