@@ -15,4 +15,12 @@ public class UserRefreshToken
     public DateTime RefreshTokenExpiry { get; set; }
 
     public User User { get; set; }
+
+    public bool RefreshTokenExpired
+    {
+        get
+        {
+            return DateTime.Now > RefreshTokenExpiry;
+        }
+    }
 }

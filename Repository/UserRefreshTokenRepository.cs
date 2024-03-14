@@ -24,11 +24,19 @@ internal sealed class UserRefreshTokenRepository(SupplierOrdersContext context) 
         return await _context.UsersRefreshToken.AnyAsync(ut => ut.UserId == userToken.UserId && ut.RefreshToken == userToken.RefreshToken);
     }
 
-    public async Task<UserRefreshToken> Get(int id, bool trackChanges = false)
+    public async Task<UserRefreshToken> Get(int userId, bool trackChanges = false)
     {
-        return trackChanges ? await _context.UsersRefreshToken.FirstOrDefaultAsync(ut => ut.Id == id)
-            : await _context.UsersRefreshToken.AsNoTracking().FirstOrDefaultAsync(ut => ut.Id == id);
+        return trackChanges ? await _context.UsersRefreshToken.FirstOrDefaultAsync(ut => ut.UserId == userId)
+            : await _context.UsersRefreshToken.AsNoTracking().FirstOrDefaultAsync(ut => ut.UserId == userId);
     }
+
+    public async Task<UserRefreshToken> GetByUserIdAndRefreshToken(int userId, string refreshToken, bool trackChanges = false)
+    {
+        return trackChanges ? await _context.UsersRefreshToken.FirstOrDefaultAsync(ut => ut.UserId == userId && ut.RefreshToken == refreshToken)
+            : await _context.UsersRefreshToken.AsNoTracking().FirstOrDefaultAsync(ut => ut.UserId == userId && ut.RefreshToken == refreshToken);
+    }
+
+
 
     public async Task<IEnumerable<UserRefreshToken>> GetAll(bool trackChanges = false)
     {

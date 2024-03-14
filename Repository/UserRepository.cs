@@ -25,11 +25,35 @@ internal sealed class UserRepository(SupplierOrdersContext context) : IUserRepos
            || await _context.Users.AnyAsync(s => s.UserName.ToLower() == user.UserName);
     }
 
+    public async Task<bool> UserNameInUse(string userName)
+    {
+        return await _context.Users.AnyAsync(s => s.UserName.ToLower() == userName.ToLower());
+    }
+
+    public async Task<bool> UserEmailInUse(string userEmail)
+    {
+        return await _context.Users.AnyAsync(s => s.UserEmail.ToLower() == userEmail.ToLower());
+    }
+
     public async Task<User> Get(int id, bool trackChanges = false)
     {
         return
            trackChanges ? await _context.Users.FirstOrDefaultAsync(x => x.UserId == id)
            : await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == id);
+    }
+
+    public async Task<User> GetByUserName(string userName, bool trackChanges = false)
+    {
+        return
+           trackChanges ? await _context.Users.FirstOrDefaultAsync(x => x.UserName == userName)
+           : await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == userName);
+    }
+
+    public async Task<User> GetByEmail(string userEmail, bool trackChanges = false)
+    {
+        return
+           trackChanges ? await _context.Users.FirstOrDefaultAsync(x => x.UserEmail == userEmail)
+           : await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UserEmail == userEmail);
     }
 
     public async Task<IEnumerable<User>> GetAll(bool trackChanges = false)

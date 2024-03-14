@@ -1,10 +1,11 @@
+using Entities;
 using SupplierOrders.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var configuration = builder.Configuration;
-
+builder.Services.Configure<AppSettings>(configuration);
 builder.Services.ConfigureRepository(configuration);
 builder.Services.ConfigureServices();
 builder.Services.AddJwtConfiguration(configuration);
