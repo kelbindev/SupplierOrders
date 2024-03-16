@@ -1,0 +1,87 @@
+﻿@using Shared.User
+@model UserRegisterDto
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h1>Register</h1>
+                </div>
+                <div class="card-body">
+                    <form id="registrationForm" asp-controller="Account" asp-action="Register">
+                        <div class="form-group">
+                            <label asp-for="UserName"></label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="UserEmail"></label>
+                            <input asp-for="UserEmail" class="form-control" />
+                            <span asp-validation-for="UserEmail" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Password"></label>
+                            <input asp-for="Password" class="form-control" type="password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ConfirmPassword"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch('/Account/Register', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert("Account created successfully, you will be redirected to the login page")
+                        window.location.href = '/Account/Login';
+                    } else {
+                        const errorMessage = data.message || 'An error occurred';
+                        displayErrorMessage(errorMessage);
+                    }
+                })
+                .catch(error => {
+                    displayErrorMessage('An error occurred. Please try again.');
+                });
+        });
+    </script>
+}

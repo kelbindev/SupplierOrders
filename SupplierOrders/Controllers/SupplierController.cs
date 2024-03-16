@@ -6,11 +6,16 @@ using Shared;
 using Shared.Pagination;
 
 namespace SupplierOrders.Controllers;
+[Authorize]
 public class SupplierController(IServiceManager _service) : Controller
 {
     // GET: SupplierController
+    [AllowAnonymous]
     public ActionResult Index()
     {
+        if (!User.Identity.IsAuthenticated)
+            return RedirectToAction("Login","Account");
+            
         return View();
     }
 

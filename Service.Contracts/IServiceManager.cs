@@ -3,4 +3,5 @@ public interface IServiceManager
 {
     ISupplierService Supplier { get; }
     ICountryService Country { get; }
+    IUserService User { get; }
 }

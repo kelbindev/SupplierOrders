@@ -2,6 +2,7 @@
 using Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Service.Contracts;
 using Service.Utilities;
 using Shared;
 using Shared.User;
@@ -11,6 +12,7 @@ using System.Text;
 
 namespace Service;
 internal sealed class UserService(IUserRepository userRepository, IUserRefreshTokenRepository userRefreshTokenRepository, IOptions<AppSettings> appSettings)
+    : IUserService
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IUserRefreshTokenRepository _userRefreshTokenRepository = userRefreshTokenRepository;
@@ -54,7 +56,7 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
         var passwordSalt = user.PasswordSalt;
         var hashedPassword = await HMACHasher.HashValue(userDto.Password, passwordSalt);
 
-        if (hashedPassword != user.Password)
+        if (!hashedPassword.SequenceEqual(user.Password))
             return ApiResponse.FailResponse("Invalid password");
 
         var tokenResponse = await GenerateNewToken(user);
@@ -62,9 +64,9 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
         return ApiResponse.SuccessResponse(tokenResponse);
     }
 
-    private async Task<ApiResponse> RefreshToken(UserRefreshTokenDto user)
+    public async Task<ApiResponse> RefreshToken(UserRefreshTokenDto user)
     {
-        var usr = await _userRepository.GetByUserName(user.userName);
+        var usr = await _userRepository.GetByUserName(user.UserName);
 
         if (usr is null || usr.UserId == 0)
             return ApiResponse.FailResponse("User does not exists");
