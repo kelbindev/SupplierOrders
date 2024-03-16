@@ -44,9 +44,6 @@ public static class SetupDependency
                 ValidAudience = configuration["JwtSettings:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]!))
             };
-        })
-        .AddCookie(options => {
-            options.LoginPath = "/Account/Login";
         });
         return services;
     }

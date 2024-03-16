@@ -1,14 +1,16 @@
 using Entities;
 using SupplierOrders.DependencyInjection;
+using SupplierOrders.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var configuration = builder.Configuration;
 builder.Services.Configure<AppSettings>(configuration);
+builder.Services.AddJwtConfiguration(configuration);
 builder.Services.ConfigureRepository(configuration);
 builder.Services.ConfigureServices();
-builder.Services.AddJwtConfiguration(configuration);
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -25,6 +27,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseMiddleware<JwtMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

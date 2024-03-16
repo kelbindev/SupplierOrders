@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@functions {
+    public bool IsLoggedIn() => Context.Request.Cookies["user_name"] != null;
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -26,6 +30,21 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Supplier" asp-action="Index">Supplier</a>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav flex-grow-1 ml-auto justify-content-end">
+                        @if (!IsLoggedIn())
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                        }
+                        else
+                        {
+                            @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
+                            {
+                                <a class="nav-link text-dark" href="javascript:document.forms[0].submit()">Logout</a>
+                            }
+                        }
                     </ul>
                 </div>
             </div>

@@ -12,11 +12,17 @@ public class AccountController(IServiceManager services) : Controller
         return View();
     }
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(UserLoginDto user)
     {
         var response = await _services.User.Login(user);
 
-        return Ok(response);
+        if (response.Item1.Success)
+        {
+            SetCookies(response.Item2, user.RememberMe);
+        }
+
+        return Ok(response.Item1);
     }
     [HttpGet]
     public IActionResult Register()
@@ -24,10 +30,57 @@ public class AccountController(IServiceManager services) : Controller
         return View();
     }
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(UserRegisterDto user)
     {
         var response = await _services.User.Register(user);
 
         return Ok(response);
+    }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RefreshToken(UserRefreshTokenDto user)
+    {
+        var response = await _services.User.RefreshToken(user);
+
+        if (response.Item1.Success)
+        {
+            SetCookies(response.Item2, true);
+        }
+
+        return Ok(response.Item1);
+    }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("user_name");
+
+        Response.Cookies.Delete("jwt_token");
+
+        Response.Cookies.Delete("refresh_token");
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    private void SetCookies(UserTokenDto token, bool rememberMe)
+    {
+        Response.Cookies.Append("user_name",token.UserName);
+
+        Response.Cookies.Append("jwt_token", token.JwtToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict
+        });
+
+        if (!rememberMe) return;
+
+        Response.Cookies.Append("refresh_token", token.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict
+        });
     }
 }

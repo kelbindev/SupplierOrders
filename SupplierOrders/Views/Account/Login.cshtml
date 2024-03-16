@@ -1,5 +1,5 @@
 ﻿@using Shared.User
-@model UserLoginDto 
+@model UserLoginDto
 
 @{
     ViewData["Title"] = "Login";
@@ -10,7 +10,7 @@
     <div class="alert alert-danger">
         @TempData["ErrorMessage"]
     </div>
-} 
+}
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -54,7 +54,7 @@
     }
 
     <script>
-        document.getElementById('registrationForm').addEventListener('submit', function (event) {
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
             const formData = new FormData(this);
@@ -71,9 +71,6 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        alert('Account created successfully, you will be redirected to the login page');
-                        console.log(formData)
-                        saveTokenInformation(data.content, formData.rememberMe)
                         window.location.href = '/Home/Index';
                     } else {
                         const errorMessage = data.message || 'An error occurred';
@@ -84,9 +81,5 @@
                     alert('An error occurred. Please try again.');
                 });
         });
-
-        function saveTokenInformation(tokenInfo, rememberMe){
-
-        }
     </script>
 }

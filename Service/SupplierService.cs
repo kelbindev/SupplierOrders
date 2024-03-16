@@ -90,7 +90,7 @@ internal sealed class SupplierService(ISupplierRepository _repository) : ISuppli
         //TEMPLATE HEADER
         var row1Header = new object[] { "SupplierName","SupplierEmail","Country Code", "Country Name","CreatedDate","CreatedBy","UpdatedDate","UpdatedBy" };
         
-        List<object[]> rows = new List<object[]>();
+        List<object[]> rows = new();
 
         rows.Add(row1Header);
 

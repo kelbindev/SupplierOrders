@@ -46,45 +46,49 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
         return ApiResponse.SuccessResponse(user);
     }
 
-    public async Task<ApiResponse> Login(UserLoginDto userDto)
+    public async Task<(ApiResponse, UserTokenDto)> Login(UserLoginDto userDto)
     {
         var user = await _userRepository.GetByUserName(userDto.UserName);
 
         if (user is null)
-            return ApiResponse.FailResponse("User does not exists");
+            return (ApiResponse.FailResponse("User does not exists"), null);
 
         var passwordSalt = user.PasswordSalt;
         var hashedPassword = await HMACHasher.HashValue(userDto.Password, passwordSalt);
 
         if (!hashedPassword.SequenceEqual(user.Password))
-            return ApiResponse.FailResponse("Invalid password");
+            return (ApiResponse.FailResponse("Invalid password"), null);
 
-        var tokenResponse = await GenerateNewToken(user);
+        var tokenResponse = await GenerateNewToken(user, userDto.RememberMe);
 
-        return ApiResponse.SuccessResponse(tokenResponse);
+        var loginResponse = new LoginResponseDto(tokenResponse.UserName);
+
+        return (ApiResponse.SuccessResponse(loginResponse), tokenResponse);
     }
 
-    public async Task<ApiResponse> RefreshToken(UserRefreshTokenDto user)
+    public async Task<(ApiResponse, UserTokenDto)> RefreshToken(UserRefreshTokenDto user)
     {
         var usr = await _userRepository.GetByUserName(user.UserName);
 
         if (usr is null || usr.UserId == 0)
-            return ApiResponse.FailResponse("User does not exists");
+            return (ApiResponse.FailResponse("User does not exists"), null);
 
         var refreshToken = await _userRefreshTokenRepository.GetByUserIdAndRefreshToken(usr.UserId, user.refreshToken);
 
         if (refreshToken is null)
-            return ApiResponse.FailResponse("Refresh Token does not exists");
+            return (ApiResponse.FailResponse("Refresh Token does not exists"), null);
 
         if (refreshToken.RefreshTokenExpired)
-            return ApiResponse.FailResponse("Refresh Token expired");
+            return (ApiResponse.FailResponse("Refresh Token expired"), null);
 
         var tokenResponse = await GenerateNewToken(usr);
 
-        return ApiResponse.SuccessResponse(tokenResponse);
+        var loginResponse = new LoginResponseDto(tokenResponse.UserName);
+
+        return (ApiResponse.SuccessResponse(loginResponse), tokenResponse);
     }
 
-    private async Task<UserTokenDto> GenerateNewToken(User user)
+    private async Task<UserTokenDto> GenerateNewToken(User user, bool includeRefreshToken = true)
     {
         var jwtToken = GenerateToken(user);
         var refreshToken = GenerateRefreshToken();
@@ -92,15 +96,18 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
         var userRefreshToken = new UserRefreshToken
         {
             UserId = user.UserId,
-            RefreshToken = refreshToken.RefreshTokenKey,
-            RefreshTokenExpiry = refreshToken.RefreshTokenExpiry
+            RefreshToken = includeRefreshToken ? refreshToken.RefreshTokenKey : string.Empty,
+            RefreshTokenExpiry = includeRefreshToken ? refreshToken.RefreshTokenExpiry : DateTime.Now
         };
 
-        if (await _userRefreshTokenRepository.Exists(userRefreshToken))
-            await _userRefreshTokenRepository.Update(userRefreshToken);
-        else
-            await _userRefreshTokenRepository.Add(userRefreshToken);
-        
+        if (includeRefreshToken)
+        {
+            if (await _userRefreshTokenRepository.Exists(userRefreshToken))
+                await _userRefreshTokenRepository.Update(userRefreshToken);
+            else
+                await _userRefreshTokenRepository.Add(userRefreshToken);
+        }
+
         return new UserTokenDto(user.UserName, jwtToken.Token, refreshToken.RefreshTokenKey, refreshToken.RefreshTokenExpiry);
     }
 
@@ -111,9 +118,9 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
 
         var claims = new List<Claim>
         {
-            new Claim("UserId",user.UserId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Email, user.UserEmail)
+            new("UserId",user.UserId.ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.UserName),
+            new(JwtRegisteredClaimNames.Email, user.UserEmail)
         };
 
         var tokenExpiry = DateTime.Now.AddMinutes(Convert.ToInt32(_appSettings.Value.JwtSettings.AccessTokenExpiryInMinutes));
