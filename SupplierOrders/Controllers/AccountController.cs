@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
+using Shared;
 using Shared.User;
 
 namespace SupplierOrders.Controllers;
@@ -39,8 +40,16 @@ public class AccountController(IServiceManager services) : Controller
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RefreshToken(UserRefreshTokenDto user)
+    public async Task<IActionResult> RefreshToken()
     {
+        var userName = Request.Cookies["user_name"];
+        var refreshToken = Request.Cookies["refresh_token"];
+
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(refreshToken))
+            return Ok(ApiResponse.FailResponse("Session Expired"));
+
+        var user = new UserRefreshTokenDto(userName, refreshToken);
+
         var response = await _services.User.RefreshToken(user);
 
         if (response.Item1.Success)
@@ -68,15 +77,6 @@ public class AccountController(IServiceManager services) : Controller
         Response.Cookies.Append("user_name",token.UserName);
 
         Response.Cookies.Append("jwt_token", token.JwtToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict
-        });
-
-        if (!rememberMe) return;
-
-        Response.Cookies.Append("refresh_token", token.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,

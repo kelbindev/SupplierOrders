@@ -118,9 +118,8 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
 
         var claims = new List<Claim>
         {
-            new("UserId",user.UserId.ToString()),
             new(JwtRegisteredClaimNames.Sub, user.UserName),
-            new(JwtRegisteredClaimNames.Email, user.UserEmail)
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
         var tokenExpiry = DateTime.Now.AddMinutes(Convert.ToInt32(_appSettings.Value.JwtSettings.AccessTokenExpiryInMinutes));
