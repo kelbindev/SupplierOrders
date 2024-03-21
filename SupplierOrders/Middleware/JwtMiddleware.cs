@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using Shared.Constant;
 using Shared.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -21,8 +22,9 @@ public class JwtMiddleware
     {
         try
         {
-            var token = context.Request.Cookies["jwt_token"];
-            var userName = context.Request.Cookies["user_name"];
+            var token = context.Request.Cookies[CookiesName.JwtToken];
+            var userName = context.Request.Cookies[CookiesName.UserName];
+            var rememberMe = context.Request.Cookies[CookiesName.RememberMe] == "true";
 
             if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(userName))
             {
@@ -44,21 +46,30 @@ public class JwtMiddleware
 
             var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
-            if (PrincipalExpiringSoon(principal))
+            if (PrincipalExpiringSoon(principal) && rememberMe)
             {
-
                 var newToken = GenerateToken(userName);
 
-                if (newToken is null || string.IsNullOrWhiteSpace(newToken.Token))
+                if (newToken is null || string.IsNullOrWhiteSpace(newToken.Token)) { 
                     await _next(context);
+                }
 
-                context.Response.Cookies.Append("user_name", userName);
+                context.Response.Cookies.Append(CookiesName.UserName, userName);
 
-                context.Response.Cookies.Append("jwt_token", newToken.Token, new CookieOptions
+                context.Response.Cookies.Append(CookiesName.JwtToken, newToken.Token, new CookieOptions
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.Now.AddDays(30)
+                });
+
+                context.Response.Cookies.Append(CookiesName.RememberMe, "true", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.Now.AddDays(30)
                 });
 
                 context.Request.Headers.Add("Authorization", $"Bearer {newToken.Token}");

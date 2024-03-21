@@ -66,49 +66,11 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
         return (ApiResponse.SuccessResponse(loginResponse), tokenResponse);
     }
 
-    public async Task<(ApiResponse, UserTokenDto)> RefreshToken(UserRefreshTokenDto user)
-    {
-        var usr = await _userRepository.GetByUserName(user.UserName);
-
-        if (usr is null || usr.UserId == 0)
-            return (ApiResponse.FailResponse("User does not exists"), null);
-
-        var refreshToken = await _userRefreshTokenRepository.GetByUserIdAndRefreshToken(usr.UserId, user.refreshToken);
-
-        if (refreshToken is null)
-            return (ApiResponse.FailResponse("Refresh Token does not exists"), null);
-
-        if (refreshToken.RefreshTokenExpired)
-            return (ApiResponse.FailResponse("Refresh Token expired"), null);
-
-        var tokenResponse = await GenerateNewToken(usr);
-
-        var loginResponse = new LoginResponseDto(tokenResponse.UserName);
-
-        return (ApiResponse.SuccessResponse(loginResponse), tokenResponse);
-    }
-
-    private async Task<UserTokenDto> GenerateNewToken(User user, bool includeRefreshToken = true)
+      private async Task<UserTokenDto> GenerateNewToken(User user, bool includeRefreshToken = true)
     {
         var jwtToken = GenerateToken(user);
-        var refreshToken = GenerateRefreshToken();
 
-        var userRefreshToken = new UserRefreshToken
-        {
-            UserId = user.UserId,
-            RefreshToken = includeRefreshToken ? refreshToken.RefreshTokenKey : string.Empty,
-            RefreshTokenExpiry = includeRefreshToken ? refreshToken.RefreshTokenExpiry : DateTime.Now
-        };
-
-        if (includeRefreshToken)
-        {
-            if (await _userRefreshTokenRepository.Exists(userRefreshToken))
-                await _userRefreshTokenRepository.Update(userRefreshToken);
-            else
-                await _userRefreshTokenRepository.Add(userRefreshToken);
-        }
-
-        return new UserTokenDto(user.UserName, jwtToken.Token, refreshToken.RefreshTokenKey, refreshToken.RefreshTokenExpiry);
+        return new UserTokenDto(user.UserName, jwtToken.Token);
     }
 
     private JwtToken GenerateToken(User user)
@@ -135,15 +97,5 @@ internal sealed class UserService(IUserRepository userRepository, IUserRefreshTo
         string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
         return new JwtToken(jwtToken, tokenExpiry);
-    }
-
-    private RefreshToken GenerateRefreshToken()
-    {
-        int refreshTokenExpiryInMinutes = _appSettings.Value.JwtSettings.RefreshTokenExpiryInDays;
-
-        string refreshTokenKey = Guid.NewGuid().ToString();
-        DateTime refreshTokenExpiry = DateTime.Now.AddDays(Convert.ToInt32(refreshTokenExpiryInMinutes));
-
-        return new RefreshToken(refreshTokenKey, refreshTokenExpiry);
     }
 }
